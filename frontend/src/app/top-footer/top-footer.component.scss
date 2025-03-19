@@ -1,0 +1,53 @@
+.top-footer {
+    background-color: #333;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  
+    .top-footer-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+  
+    .logo-img {
+      width: 120px;
+    }
+  
+    .nav-links {
+      display: flex;
+      gap: 20px;
+    }
+  
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      font-size: 1.1em;
+      transition: color 0.3s;
+  
+      &:hover {
+        color: #ff6347;
+      }
+    }
+  
+    .cta-button {
+      .cta-button {
+        background-color: #ff6347;
+        color: white;
+        padding: 12px 25px;
+        font-size: 1.2em;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+  
+        &:hover {
+          background-color: #e5533e;
+        }
+      }
+    }
+  }
+  

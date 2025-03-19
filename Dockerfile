@@ -10,6 +10,7 @@ COPY frontend/ /app/frontend/
 COPY frontend/package.json frontend/package-lock.json ./
 COPY frontend/angular.json ./
 RUN npm install
+RUN npm install primeng @primeng/themes
 
 # Build Angular app
 RUN npm run build

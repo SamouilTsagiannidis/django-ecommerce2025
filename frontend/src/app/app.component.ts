@@ -1,15 +1,14 @@
 import { Component } from '@angular/core';
 import { ProductListComponent } from './product-list/product-list.component';
 import { ButtonModule } from 'primeng/button';
+import { LandingComponent } from './landing/landing.component';
+
 @Component({
   selector: 'app-root',
   standalone: true,
   template: `
-    <app-product-list></app-product-list>
-    <div class="card flex justify-center">
-      <p-button label="Check" />
-    </div>
+  <app-landing></app-landing>
   `,
-  imports: [ProductListComponent, ButtonModule]
+  imports: [ProductListComponent, ButtonModule,LandingComponent]
 })
 export class AppComponent {}
