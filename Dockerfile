@@ -11,6 +11,8 @@ COPY frontend/package.json frontend/package-lock.json ./
 COPY frontend/angular.json ./
 RUN npm install
 RUN npm install primeng @primeng/themes
+RUN npm install ngx-owl-carousel-o
+
 
 # Build Angular app
 RUN npm run build

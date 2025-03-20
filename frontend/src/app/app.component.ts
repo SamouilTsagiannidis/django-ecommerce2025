@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { ProductListComponent } from './product-list/product-list.component';
 import { ButtonModule } from 'primeng/button';
 import { LandingComponent } from './landing/landing.component';
 
@@ -9,6 +8,6 @@ import { LandingComponent } from './landing/landing.component';
   template: `
   <app-landing></app-landing>
   `,
-  imports: [ProductListComponent, ButtonModule,LandingComponent]
+  imports: [ButtonModule,LandingComponent]
 })
 export class AppComponent {}
