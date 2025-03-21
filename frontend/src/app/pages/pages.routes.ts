@@ -5,6 +5,7 @@ import { Empty } from './empty/empty';
 
 export default [
     { path: 'documentation', component: Documentation },
+    {path: 'products', component: Documentation},
     { path: 'crud', component: Crud },
     { path: 'empty', component: Empty },
     { path: '**', redirectTo: '/notfound' }

@@ -28,10 +28,6 @@ docker-compose.override.yml
 *.egg-info/
 pip-log.txt
 
-# Migrations (optional)
-**/migrations/*.py
-!**/migrations/__init__.py
-
 # Compiled C files
 *.so
 
