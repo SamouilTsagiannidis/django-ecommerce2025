@@ -39,6 +39,10 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+    command: >
+      sh -c "until nc -z db 3306; do sleep 1; done &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
 
 volumes:
   mariadb_data:

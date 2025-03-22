@@ -22,7 +22,7 @@ staticfiles/
 *.env
 .env
 .env.*
-docker-compose.override.yml
+
 
 # Python dependencies
 *.egg-info/
