@@ -3,13 +3,13 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django.contrib.sessions.models import Session
 from django.shortcuts import get_object_or_404
-from ecommerce.models.Cart import CartItem
+from ecommerce.models.Cart import Cart
 from ecommerce.models.Product import Product
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from ecommerce.serializers import CartSerializer
 
-class CartView(ReadOnlyModelViewSet):
-    queryset = CartItem.objects.all()
+class CartViewSet(ReadOnlyModelViewSet):
+    queryset = Cart.objects.all()
     serializer_class = CartSerializer
 
     @api_view(['POST'])
@@ -28,7 +28,7 @@ class CartView(ReadOnlyModelViewSet):
         product = get_object_or_404(Product, id=product_id)
 
         if request.user.is_authenticated:
-            cart_item, created = CartItem.objects.get_or_create(
+            cart_item, created = Cart.objects.get_or_create(
                 user=request.user,
                 product=product,
                 defaults={'quantity': quantity}
@@ -38,9 +38,11 @@ class CartView(ReadOnlyModelViewSet):
                 cart_item.save()
         else:
             session_id = request.session.session_key
+            if not request.session.session_key:
+                request.session.create()
+            session_id = request.session.session_key
 
-
-            cart_item, created = CartItem.objects.get_or_create(
+            cart_item, created = Cart.objects.get_or_create(
                 session_id=session_id,
                 product=product,
                 defaults={'quantity': quantity}

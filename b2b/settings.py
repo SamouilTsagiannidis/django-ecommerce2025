@@ -64,8 +64,13 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
+AUTH_USER_MODEL = 'ecommerce.User'
 
 ROOT_URLCONF = 'b2b.urls'
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_NAME = 'sessionid'  # Default name of the session cookie
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False  # Ensure the session persists after the browser is closed
+SESSION_COOKIE_AGE = 3600  # Time in seconds before the session expires (1 hour)
 
 TEMPLATES = [
     {
