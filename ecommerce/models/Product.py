@@ -16,9 +16,9 @@ class Product(models.Model):
     
     def get_stock_status(self):
         if self.stock <= 0:
-            availability = 'OUT OF STOCK'
+            return 'OUT OF STOCK'
         elif self.stock < 10:
-            availability = 'LOW OF STOCK'
+            return 'LOW OF STOCK'
         else:
-            availability = 'IN STOCK' 
+            return 'IN STOCK' 
     

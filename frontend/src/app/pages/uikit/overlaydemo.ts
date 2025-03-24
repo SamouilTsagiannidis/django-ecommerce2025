@@ -163,7 +163,7 @@ export class OverlayDemo implements OnInit {
     ) {}
 
     ngOnInit() {
-        this.productService.getProductsSmall().then((products) => (this.products = products));
+        // this.productService.getProductsSmall().then((products) => (this.products = products));
 
         this.images = [];
         this.images.push({

@@ -168,7 +168,9 @@ export class ListDemo {
     constructor(private productService: ProductService) {}
 
     ngOnInit() {
-        this.productService.getProductsSmall().then((data) => (this.products = data.slice(0, 6)));
+        this.productService.getProductsSmall().subscribe((products: Product[]) => {
+            this.products = products;  // or any other logic you want to perform
+          });
 
         this.sourceCities = [
             { name: 'San Francisco', code: 'SF' },

@@ -244,9 +244,9 @@ export class Crud implements OnInit {
     }
 
     loadDemoData() {
-        this.productService.getProducts().then((data) => {
-            this.products.set(data);
-        });
+        // this.productService.getProducts().then((data) => {
+        //     this.products.set(data);
+        // });
 
         this.statuses = [
             { label: 'INSTOCK', value: 'instock' },

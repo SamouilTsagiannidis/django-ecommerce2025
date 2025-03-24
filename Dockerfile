@@ -1,44 +1,44 @@
-# Use official Node.js image for Angular build
+# Build the frontend
 FROM node:18 AS build-stage
 
-# Set working directory for Angular app
 WORKDIR /app/frontend
 
-# Copy package.json and package-lock.json separately for better caching
+# Copy package files first for caching
 COPY frontend/package.json frontend/package-lock.json ./
 
-# Install Angular dependencies
 RUN npm install
 
-# Install additional dependencies (avoid multiple installs)
-RUN npm install primeng @primeng/themes ngx-owl-carousel-o
-
-# Copy the rest of the Angular project files
+# Copy the rest of the frontend files
 COPY frontend/ ./
 
-# Build Angular app
-RUN npm run build
+# Build the production version of the frontend
+RUN npm run build --prod
 
-# Use official Python image for Django
-FROM python:3.11
 
-# Set working directory for Django project
+# Set up the backend with Python/Django
+FROM python:3.11 AS backend
+
+# Install dependencies
+RUN apt-get update && apt-get install -y netcat-openbsd mariadb-client
+
 WORKDIR /app
 
-# Copy only requirements file first for better caching
+# Copy the requirements file and install Python dependencies
 COPY requirements.txt .
+RUN pip install -r /app/requirements.txt
 
-# Install dependencies for Django
-RUN pip install --no-cache-dir -r requirements.txt && python -m pip freeze
-
-# Copy the rest of the Django project files
+# Copy the backend application code
 COPY . .
 
-# Copy the Angular build output from the build-stage
-COPY --from=build-stage /app/frontend/dist /app/frontend/dist
+# Copy the static frontend build into the backend
+COPY --from=build-stage /app/frontend/dist /app/static/
 
-# Expose the port Django will run on
+# Collect static files (Django)
+RUN python manage.py collectstatic --noinput
+
+# Expose port for the app
 EXPOSE 8000
 
-# Run Django server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Start the Django application with Gunicorn
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "your_project.wsgi:application"]
+

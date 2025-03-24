@@ -17,9 +17,11 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Setup local machine environment lookup. You should place a .env file within the project folder
+# Initialize environment variables
 env = environ.Env()
-environ.Env.read_env()
+
+# Load the .env file from one folder outside
+environ.Env.read_env(os.path.join(BASE_DIR.parent, ".env"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -32,6 +34,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Application definition
 
@@ -47,7 +50,7 @@ INSTALLED_APPS = [
     'ecommerce',
     'corsheaders'
 ]
-
+CSRF_TRUSTED_ORIGINS = ['http://localhost:4200']
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -88,12 +91,12 @@ WSGI_APPLICATION = 'b2b.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE':   env.str('DATABASE_ENGINE'),
-        'NAME':     env.str('DATABASE_NAME'),
-        'USER':     env.str('DATABASE_USER'),
-        'PASSWORD': env.str('DATABASE_PASSWORD'),
-        'HOST':     env.str('DATABASE_HOST'), # Or an IP Address that your DB is hosted on
-        'PORT':     env.str('DATABASE_PORT'),
+        'ENGINE':   "django.db.backends.mysql",
+        'NAME':     "ecommerceDB",
+        'USER':     'root',
+        'PASSWORD': 'root',
+        'HOST':     'db', # Or an IP Address that your DB is hosted on
+        'PORT':    '3306',
     },
 }
 
