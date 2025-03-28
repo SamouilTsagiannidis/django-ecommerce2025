@@ -1,2 +1,2 @@
 from .Product import Product
-from .Cart import CartItem
+from .Cart import Cart

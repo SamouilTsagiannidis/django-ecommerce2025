@@ -63,7 +63,7 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
                         <p-button icon="pi pi-shopping-cart" styleClass="ml-2" />
                     </p-overlaybadge>
                 <button pButton pRipple label="Login" routerLink="/auth/login" [rounded]="true" [text]="true"></button>
-                <button pButton pRipple label="Register" routerLink="/auth/login" [rounded]="true"></button>
+                <button pButton pRipple label="Register" routerLink="/auth/register" [rounded]="true"></button>
             </div>
         </div> `
 })

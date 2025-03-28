@@ -64,7 +64,6 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
-AUTH_USER_MODEL = 'ecommerce.User'
 
 ROOT_URLCONF = 'b2b.urls'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'

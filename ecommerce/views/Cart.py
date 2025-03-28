@@ -22,8 +22,6 @@ class CartViewSet(ReadOnlyModelViewSet):
         product_id = request.data.get('product_id')
         quantity = request.data.get('quantity', 1)
 
-        if not product_id:
-            return Response({"error": "Product ID is required"}, status=400)
 
         product = get_object_or_404(Product, id=product_id)
 
