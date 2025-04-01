@@ -7,7 +7,7 @@ import { OverlayBadgeModule } from 'primeng/overlaybadge';
 
 @Component({
   selector: 'app-topbar',
-    imports: [RouterModule, StyleClassModule, ButtonModule, RippleModule,OverlayBadgeModule],
+    imports: [RouterModule, StyleClassModule, ButtonModule, RippleModule, OverlayBadgeModule],
     standalone: true,
     templateUrl: './topbar.component.html',
     styleUrl: './topbar.component.scss'})

@@ -1,0 +1,54 @@
+[
+  {
+    "model": "ecommerce.product",
+    "pk": 1,
+    "fields": {
+      "name": "Classic T-Shirt",
+      "code": "TSHIRT001",
+      "price": "19.99",
+      "rating": 4,
+      "description": "A comfortable and classic cotton t-shirt.",
+      "stock": 50,
+      "category": "Apparel"
+    }
+  },
+  {
+    "model": "ecommerce.product",
+    "pk": 2,
+    "fields": {
+      "name": "Running Sneakers",
+      "code": "SNKR005",
+      "price": "89.95",
+      "rating": 5,
+      "description": "Lightweight sneakers perfect for running or casual wear.",
+      "stock": 25,
+      "category": "Footwear"
+    }
+  },
+  {
+    "model": "ecommerce.product",
+    "pk": 3,
+    "fields": {
+      "name": "Wireless Headphones",
+      "code": "HDPHN012",
+      "price": "149.00",
+      "rating": 4,
+      "description": "Noise-cancelling over-ear wireless headphones with long battery life.",
+      "stock": 15,
+      "category": "Electronics"
+    }
+  },
+  {
+    "model": "ecommerce.product",
+    "pk": 4,
+    "fields": {
+      "name": "Coffee Mug",
+      "code": "MUG003",
+      "price": "12.50",
+      "rating": 3,
+      "description": "Ceramic coffee mug with a stylish design.",
+      "stock": 100,
+      "category": "Home Goods"
+    }
+  }
+] 

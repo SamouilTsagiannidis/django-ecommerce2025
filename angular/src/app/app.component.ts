@@ -3,10 +3,14 @@ import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.scss'
+  standalone: true,
+  imports: [
+      RouterOutlet,
+  ],
+  template: `
+     <router-outlet></router-outlet>
+  `
 })
 export class AppComponent {
-  title = 'angular';
+  title = 'django-ecommerce2025';
 }

@@ -8,19 +8,19 @@ import { HttpHeaders } from '@angular/common/http';
 
 
 export interface Product {
-    id?: string;
+    id?: number;
     code?: string;
     name?: string;
     description?: string;
     price?: number;
-    quantity?: number;
-    inventoryStatus?: string;
+    stock?: number;
     category?: string;
-    image?: string;
+    main_image?: string;
     rating?: number;
+    get_stock_status?: string;
 }
 
-@Injectable()
+@Injectable({ providedIn: 'root' })
 export class ProductService {
     private apiUrl = 'http://localhost:8000/api/products/';
     constructor(private http: HttpClient) { }

@@ -45,11 +45,20 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'rest_framework.authtoken',
+    'authentication',
     'rest_framework',
     'ecommerce',
     'corsheaders'
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
+
 CSRF_TRUSTED_ORIGINS = ['http://localhost:4200']
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

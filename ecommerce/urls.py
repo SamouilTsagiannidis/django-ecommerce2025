@@ -5,7 +5,6 @@ from django.conf import settings
 from rest_framework.routers import DefaultRouter
 from django.urls import path, include
 from ecommerce.views.Cart import CartViewSet
-from ecommerce.views.Registration import UserRegistrationView
 
 
 router = DefaultRouter()
@@ -16,8 +15,7 @@ router.register(r'cart', CartViewSet, basename='cart')
 
 urlpatterns = [
     path('api/', include(router.urls)),
-    path('cart/add/', CartViewSet.add_to_cart, name='add_to_cart'),
-    path('register', UserRegistrationView.user_register, name='user_register')
+    path('api/auth/', include('authentication.urls')),
 
 ]
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
