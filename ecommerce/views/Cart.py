@@ -34,7 +34,7 @@ class CartViewSet(viewsets.ModelViewSet):
         Use CartSerializer for list/retrieve actions on the whole cart,
         and CartItemSerializer for item-specific actions.
         """
-        if self.action == 'list' or self.action == 'retrieve_cart': # Use retrieve_cart for the dedicated GET
+        if self.action == 'list' or self.action == 'retrieve_cart' or self.action == 'view_cart': # Add view_cart
              return CartSerializer
         return CartItemSerializer # Default for create, update, destroy
 
@@ -76,6 +76,32 @@ class CartViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'], url_path='details', url_name='cart-details')
     def retrieve_cart(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs) # Reuse list logic for now
+
+    # Add a new dedicated action for viewing the cart with enhanced information
+    @action(detail=False, methods=['get'], url_path='view', url_name='view-cart')
+    def view_cart(self, request, *args, **kwargs):
+        """
+        Enhanced view of the cart with additional information.
+        Returns the cart with items, total price, item count, and other useful information.
+        """
+        cart, _ = Cart.objects.get_or_create(user=request.user)
+        serializer = CartSerializer(cart, context={'request': request})
+        
+        # Get the basic cart data
+        cart_data = serializer.data
+        
+        # Add additional information
+        item_count = sum(item.quantity for item in cart.items.all())
+        
+        # Enhance the response with additional information
+        enhanced_data = {
+            'cart': cart_data,
+            'item_count': item_count,
+            'is_empty': item_count == 0,
+            'message': 'Your cart is empty.' if item_count == 0 else f'You have {item_count} items in your cart.'
+        }
+        
+        return Response(enhanced_data)
 
     # Update (PATCH) and Destroy (DELETE) will work on CartItems by default
     # based on the default queryset and serializer_class

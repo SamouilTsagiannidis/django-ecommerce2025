@@ -1,8 +1,9 @@
 import { Routes } from '@angular/router';
 import { LoginComponent } from './shared/components/login/login.component';
 import { RegisterComponent } from './shared/components/register/register.component';
-import { LayoutComponent } from './layout/layout.component';
 import { CartComponent } from './pages/cart/cart.component';
+import { HomepageComponent } from './themes/base/homepage/homepage.component';
+import { AuthGuard } from './shared/guards/auth.guard';
 // Import your dashboard/home component when created
 // import { DashboardComponent } from './pages/dashboard/dashboard.component';
 
@@ -11,23 +12,27 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'register', component: RegisterComponent },
 
+  // Direct route to cart - protected with AuthGuard
+  { 
+    path: 'cart', 
+    component: CartComponent, 
+    canActivate: [AuthGuard],
+    data: { requiresAuth: true }
+  },
+
   // Routes within the main layout
   {
     path: '', // Base path for layout routes
-    component: LayoutComponent,
+    component: HomepageComponent,
     children: [
-      // Cart route
-      { path: 'cart', component: CartComponent },
-
       // Example dashboard route - uncomment and adapt when created
       // { path: 'dashboard', component: DashboardComponent },
 
-      // Redirect base path within layout to dashboard (or cart/desired landing page)
-      { path: '', redirectTo: 'cart', pathMatch: 'full' }, // Redirect empty layout path to cart for now
+      // Redirect base path within layout to home
+      { path: '', redirectTo: 'products', pathMatch: 'full' },
     ]
   },
 
-  // Catch-all for unknown routes - redirect to login (if not logged in) or dashboard/cart (if logged in)
-  // Catch-all needs refinement with AuthGuard
-  { path: '**', redirectTo: '/login' }
+  // Catch-all for unknown routes - redirect to home
+  { path: '**', redirectTo: '/' }
 ];

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface User {
@@ -36,10 +36,46 @@ export class AuthService {
   constructor(
     private http: HttpClient
   ) {
+    console.log('[AuthService] Constructor called');
+    this.initializeFromLocalStorage();
+  }
+
+  private initializeFromLocalStorage(): void {
     const token = localStorage.getItem('token');
+    console.log('[AuthService] Initializing from localStorage, token exists:', !!token);
+    
     if (token) {
-      // You might want to validate the token here
-      this.currentUserSubject.next(JSON.parse(localStorage.getItem('user') || 'null'));
+      try {
+        const userJson = localStorage.getItem('user');
+        console.log('[AuthService] User JSON from localStorage:', userJson);
+        
+        const user = userJson ? JSON.parse(userJson) : null;
+        console.log('[AuthService] User from localStorage:', user);
+        
+        if (user) {
+          this.currentUserSubject.next(user);
+          console.log('[AuthService] User state initialized from localStorage');
+        } else {
+          console.log('[AuthService] Token exists but no user data found');
+          // Create a minimal user object to ensure authentication works
+          const minimalUser = {
+            id: 0,
+            username: 'user',
+            email: '',
+            first_name: '',
+            last_name: ''
+          };
+          this.currentUserSubject.next(minimalUser);
+          console.log('[AuthService] Created minimal user object for authentication');
+        }
+      } catch (error) {
+        console.error('[AuthService] Error parsing user from localStorage:', error);
+        // Clear invalid data
+        localStorage.removeItem('user');
+      }
+    } else {
+      console.log('[AuthService] No token found in localStorage');
+      this.currentUserSubject.next(null);
     }
   }
 
@@ -58,9 +94,17 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
+    const token = this.getToken();
+    if (!token) {
+      console.log('[AuthService] No token found, skipping logout API call');
+      return of(void 0);
+    }
+    
     return this.http.post<void>(`${environment.apiUrl}/auth/logout/`, {})
       .pipe(
-        tap(() => this.handleLogout())
+        tap(() => {
+          console.log('[AuthService] Logout API call successful');
+        })
       );
   }
 
@@ -86,12 +130,12 @@ export class AuthService {
     console.log('[AuthService] Updated currentUserSubject with user:', user);
   }
 
-  private handleLogout(): void {
+  public handleLogout(): void {
     console.log('[AuthService] handleLogout called');
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     this.currentUserSubject.next(null);
-    console.log('[AuthService] Token removed from localStorage');
+    console.log('[AuthService] Token and user data removed from localStorage');
   }
 
   isAuthenticated(): boolean {
@@ -102,7 +146,6 @@ export class AuthService {
 
   getToken(): string | null {
     const token = localStorage.getItem('token');
-    console.log('[AuthService] getToken called, returning:', token);
     return token;
   }
 } 

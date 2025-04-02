@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { TopbarWidget } from '../../../shared/components/topbar/topbar.component'
+import { TopbarComponent } from '../../../shared/components/topbar/topbar.component'
 import { CartComponent } from "../../../shared/components/cart/cart.component";
 import { FooterComponent } from "../../../shared/components/footer/footer.component";
 import { CommonModule } from '@angular/common';
@@ -11,14 +11,13 @@ import { PickListModule } from 'primeng/picklist';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { TagModule } from 'primeng/tag';
 import { Product, ProductService } from '../../../shared/services/product.service';
-
 import { CartService } from '../../../shared/services/cart.service';
 import { DialogModule } from 'primeng/dialog';
 
 
 @Component({
   selector: 'app-productsview',
-  imports: [CommonModule, DataViewModule, FormsModule, SelectButtonModule, PickListModule, OrderListModule, TagModule, ButtonModule, FooterComponent, TopbarWidget, DialogModule],
+  imports: [CommonModule, DataViewModule, FormsModule, SelectButtonModule, PickListModule, OrderListModule, TagModule, ButtonModule, FooterComponent, TopbarComponent, DialogModule],
   templateUrl: './productsview.component.html',
   styleUrl: './productsview.component.scss',
   providers: [ProductService]

@@ -49,10 +49,23 @@
         </li>
     </ul>
     <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
-            <p-overlaybadge value="2">
-                <p-button icon="pi pi-shopping-cart" styleClass="ml-2" />
-            </p-overlaybadge>
-        <button pButton pRipple label="Login" routerLink="login" [rounded]="true" [text]="true"></button>
-        <button pButton pRipple label="Register" routerLink="register" [rounded]="true"></button>
+        <!-- Cart icon with badge - only shown when authenticated -->
+        <a *ngIf="isAuthenticated" 
+           pButton 
+           pRipple 
+           icon="pi pi-shopping-cart" 
+           (click)="navigateToCart()" 
+           class="p-button-rounded p-button-text relative">
+            <span *ngIf="cartItemCount > 0" class="p-badge p-badge-danger">{{cartItemCount}}</span>
+        </a>
+        
+        <!-- Authentication buttons -->
+        <ng-container *ngIf="!isAuthenticated">
+            <button pButton pRipple label="Login" routerLink="/login" [rounded]="true" [text]="true"></button>
+            <button pButton pRipple label="Register" routerLink="/register" [rounded]="true"></button>
+        </ng-container>
+        
+        <!-- Logout button - only shown when authenticated -->
+        <button *ngIf="isAuthenticated" pButton pRipple label="Logout" (click)="logout()" [rounded]="true" [text]="true"></button>
     </div>
 </div>

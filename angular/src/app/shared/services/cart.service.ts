@@ -6,6 +6,7 @@ import { AuthService } from './auth.service';
 import { Product } from './product.service'; // Assuming you have a Product interface
 
 // Define interfaces for Cart and CartItem based on your Django serializers
+
 export interface CartItem {
   id: number; // Primary key of the CartItem itself
   product: Product; // Use a specific Product interface
@@ -20,6 +21,14 @@ export interface Cart {
   total_price?: number; // Optional: Calculated by backend
 }
 
+// New interface for the enhanced cart view response
+export interface CartView {
+  cart: Cart;
+  item_count: number;
+  is_empty: boolean;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -27,10 +36,15 @@ export class CartService {
   // Base API URL from environment
   private baseApiUrl = environment.apiUrl;
   private cartUrl = `${this.baseApiUrl}/cart/`; // Unified URL for the ViewSet
+  private viewCartUrl = `${this.cartUrl}view/`; // URL for the enhanced view_cart endpoint
 
   private cartSubject = new BehaviorSubject<Cart | null>(null);
   cart$ = this.cartSubject.asObservable();
-
+  
+  // New BehaviorSubject for the enhanced cart view
+  private cartViewSubject = new BehaviorSubject<CartView | null>(null);
+  cartView$ = this.cartViewSubject.asObservable();
+  
   constructor(
       private http: HttpClient,
       private authService: AuthService
@@ -54,6 +68,16 @@ export class CartService {
       id: 0, // Temporary ID
       items: [],
       total_price: 0
+    };
+  }
+
+  // Create an empty cart view for use when API fails
+  private createEmptyCartView(): CartView {
+    return {
+      cart: this.createEmptyCart(),
+      item_count: 0,
+      is_empty: true,
+      message: 'Your cart is empty.'
     };
   }
 
@@ -85,6 +109,38 @@ export class CartService {
             }
             
             this.cartSubject.next(null);
+            return of(null);
+        })
+    );
+  }
+
+  // New method to fetch the enhanced cart view
+  getCartView(): Observable<CartView | null> {
+    console.log('Attempting to fetch enhanced cart view from:', this.viewCartUrl);
+    
+    // Add explicit Authorization header
+    const headers = this.getAuthHeaders();
+    
+    return this.http.get<CartView>(this.viewCartUrl, { headers }).pipe(
+        tap(cartView => {
+            console.log('Enhanced cart view fetched successfully:', cartView);
+            this.cartViewSubject.next(cartView);
+            // Also update the regular cart subject
+            this.cartSubject.next(cartView.cart);
+        }),
+        catchError(error => {
+            console.error('Error fetching enhanced cart view:', error);
+            if (error.status === 500) {
+                console.warn('Server error (500) encountered while fetching cart view. The backend may have an issue.');
+                // Use empty cart view instead of null for better UX
+                const emptyCartView = this.createEmptyCartView();
+                this.cartViewSubject.next(emptyCartView);
+                return of(emptyCartView);
+            } else if (error.status === 401) {
+                console.warn('Authentication error (401) encountered. Token may be invalid or missing.');
+            }
+            
+            this.cartViewSubject.next(null);
             return of(null);
         })
     );
@@ -158,14 +214,23 @@ export class CartService {
   // Helper to refresh the cart state after modification
   private refreshCart() {
     if (this.authService.isAuthenticated()) {
-        // Re-fetch the cart which will update the BehaviorSubject
-        this.getCart().pipe(take(1)).subscribe();
+        console.log('[CartService] User is authenticated, refreshing cart');
+        // Use the enhanced cart view instead of the basic cart
+        this.getCartView().pipe(take(1)).subscribe({
+          next: (cartView) => console.log('[CartService] Cart refreshed successfully:', cartView?.item_count || 0, 'items'),
+          error: (err) => console.error('[CartService] Error refreshing cart:', err)
+        });
+    } else {
+        console.log('[CartService] Not refreshing cart - user not authenticated');
+        // Clear local cart state when not authenticated
+        this.clearLocalCart();
     }
   }
 
   // Clear local cart state (called by authService subscription on logout)
   clearLocalCart() {
-      console.log('Clearing local cart state.');
+      console.log('[CartService] Clearing local cart state');
       this.cartSubject.next(null);
+      this.cartViewSubject.next(null);
   }
 }

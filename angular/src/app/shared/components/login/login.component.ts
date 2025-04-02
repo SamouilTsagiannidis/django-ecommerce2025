@@ -44,6 +44,7 @@ export class LoginComponent implements OnInit {
   fieldErrors: { [key: string]: string[] } = {}; // Store field-specific errors
   nonFieldErrors: string[] = []; // Store errors not tied to a specific field
   loading: boolean = false;
+  redirectUrl: string | null = null;
   // messages property removed
 
   constructor(
@@ -60,7 +61,9 @@ export class LoginComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Additional initialization logic if needed
+    // Check if there's a saved redirect URL
+    this.redirectUrl = localStorage.getItem('redirectUrl');
+    console.log('[LoginComponent] ngOnInit - Saved redirect URL:', this.redirectUrl);
   }
 
   onSubmit(): void {
@@ -82,23 +85,31 @@ export class LoginComponent implements OnInit {
           console.log('[LoginComponent] authService.login successful:', response);
           this.loading = false;
           
-          // Navigate to home instead of cart to avoid issues
-          console.log('[LoginComponent] Attempting to navigate to home page...');
-          this.router.navigate(['/'])
+          // Determine where to navigate after login
+          let targetUrl = '/';
+          if (this.redirectUrl) {
+            targetUrl = this.redirectUrl;
+            console.log('[LoginComponent] Using saved redirect URL:', targetUrl);
+            // Clear the saved URL
+            localStorage.removeItem('redirectUrl');
+          }
+          
+          console.log('[LoginComponent] Attempting to navigate to:', targetUrl);
+          this.router.navigateByUrl(targetUrl)
             .then(success => {
-              console.log('[LoginComponent] Navigation to home result:', success);
+              console.log('[LoginComponent] Navigation result:', success);
               
               if (success) {
                 // Fetch cart after successful navigation with delay to avoid timing issues
                 setTimeout(() => {
                   console.log('[LoginComponent] Fetching cart after successful login and navigation...');
-                  this.cartService.getCart().subscribe({
+                  this.cartService.getCartView().subscribe({
                     next: cart => console.log('[LoginComponent] Cart fetched after login:', cart),
                     error: err => console.error('[LoginComponent] Error fetching cart after login:', err)
                   });
-                }, 0);
+                }, 500); // Increased delay to ensure auth state is fully processed
               } else {
-                console.error('[LoginComponent] Navigation to home failed!');
+                console.error('[LoginComponent] Navigation failed!');
                 this.nonFieldErrors.push('Could not navigate after login.');
               }
             });

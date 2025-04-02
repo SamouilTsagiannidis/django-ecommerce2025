@@ -1,132 +1,163 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { AsyncPipe, CommonModule, CurrencyPipe } from '@angular/common';
-import { CartService, Cart, CartItem } from '../../shared/services/cart.service'; // Adjust path
-import { Observable } from 'rxjs';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+import { Subscription, Observable } from 'rxjs';
+
+// PrimeNG Imports
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { DividerModule } from 'primeng/divider';
 import { RippleModule } from 'primeng/ripple';
-import { InputNumberModule } from 'primeng/inputnumber'; // For quantity updates
-import { FormsModule } from '@angular/forms'; // For ngModel on inputnumber
+
+// Services
+import { CartService, CartItem, CartView } from '../../shared/services/cart.service';
+import { AuthService } from '../../shared/services/auth.service';
+import { MessageService } from 'primeng/api';
+import { ConfirmationService } from 'primeng/api';
 
 @Component({
   selector: 'app-cart',
   standalone: true,
   imports: [
     CommonModule,
-    AsyncPipe,
-    CurrencyPipe,
+    FormsModule,
+    TableModule,
     ButtonModule,
-    RippleModule,
-    InputNumberModule, // Add InputNumberModule
-    FormsModule // Add FormsModule
+    CardModule,
+    ToastModule,
+    ConfirmDialogModule,
+    InputNumberModule,
+    DividerModule,
+    RippleModule
   ],
-  template: `
-    <div class="card p-4">
-      <h2>Shopping Cart</h2>
-      <ng-container *ngIf="cart$ | async as cart; else loadingOrEmpty">
-        <div *ngIf="cart.items && cart.items.length > 0; else emptyCart">
-          <table class="w-full border-collapse">
-            <thead>
-              <tr class="border-b">
-                <th class="text-left p-2">Product</th>
-                <th class="text-left p-2">Price</th>
-                <th class="text-center p-2">Quantity</th>
-                <th class="text-right p-2">Total</th>
-                <th class="p-2"></th> <!-- Actions -->
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of cart.items" class="border-b">
-                <td class="p-2 flex items-center">
-                  <img [src]="item.product?.main_image || 'assets/placeholder.png'" [alt]="item.product?.name" class="w-16 h-16 object-cover mr-3">
-                  <span>{{ item.product?.name || 'Product Name Missing' }}</span>
-                </td>
-                <td class="p-2">{{ item.product?.price | currency:'USD' }}</td>
-                <td class="p-2 text-center">
-                  <!-- Use p-inputNumber for quantity -->
-                  <p-inputNumber
-                    [(ngModel)]="item.quantity"
-                    [min]="1"
-                    [max]="item.product?.stock || 99"
-                    [style]="{'width': '5rem'}"
-                    (onInput)="updateQuantity(item, $event.value)"
-                    mode="decimal" [showButtons]="true">
-                  </p-inputNumber>
-                </td>
-                <td class="p-2 text-right">{{ (item.quantity * (item.product?.price || 0)) | currency:'USD' }}</td>
-                <td class="p-2 text-center">
-                  <button pButton pRipple icon="pi pi-trash" class="p-button-danger p-button-text" (click)="removeItem(item.id)"></button>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot>
-              <tr class="font-semibold">
-                <td colspan="3" class="text-right p-2">Grand Total:</td>
-                <td class="text-right p-2">{{ cart.total_price | currency:'USD' }}</td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-          <div class="mt-4 text-right">
-            <button pButton pRipple label="Proceed to Checkout" class="p-button-success"></button>
-          </div>
-        </div>
-      </ng-container>
-
-      <ng-template #loadingOrEmpty>
-         <p>Loading cart...</p> 
-         <!-- Add check for definitively empty cart after load if cart$ emits null initially -->
-      </ng-template>
-
-      <ng-template #emptyCart>
-        <p>Your cart is empty.</p>
-      </ng-template>
-    </div>
-  `,
+  providers: [MessageService, ConfirmationService],
+  templateUrl: './cart.component.html',
+  styleUrls: ['./cart.component.scss']
 })
-export class CartComponent implements OnInit {
-  cart$: Observable<Cart | null>;
-  private cartService = inject(CartService);
+export class CartComponent implements OnInit, OnDestroy {
+  cartView$: Observable<CartView | null>;
+  private subscriptions: Subscription[] = [];
+  isAuthenticated = false;
 
-  constructor() {
-    console.log('[CartComponent] Constructor called.'); // Log construction
-    this.cart$ = this.cartService.cart$;
+  constructor(
+    private cartService: CartService,
+    private authService: AuthService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
+    private router: Router
+  ) {
+    this.cartView$ = this.cartService.cartView$;
   }
 
   ngOnInit(): void {
-    console.log('[CartComponent] ngOnInit called.'); // Log init
-    // You can log the cart value here too if needed
-    this.cart$.subscribe(cart => console.log('[CartComponent] Cart state updated:', cart));
+    console.log('Cart component initialized');
+    
+    // Check authentication status
+    this.isAuthenticated = this.authService.isAuthenticated();
+    console.log('Authentication status:', this.isAuthenticated);
+    
+    if (this.isAuthenticated) {
+      // Refresh cart data
+      this.cartService.getCartView().subscribe({
+        next: (cartView) => console.log('Cart view loaded:', cartView),
+        error: (err) => console.error('Error loading cart view:', err)
+      });
+      console.log('Cart refresh requested');
+    } else {
+      console.log('User not authenticated, redirecting to login');
+      this.router.navigate(['/login']);
+    }
+    
+    // Subscribe to auth changes
+    this.subscriptions.push(
+      this.authService.currentUser$.subscribe(user => {
+        this.isAuthenticated = !!user;
+        console.log('Auth status changed:', this.isAuthenticated);
+      })
+    );
   }
 
-  updateQuantity(item: CartItem, eventValue: string | number | null) {
-    // Convert event value to number, defaulting to current quantity if invalid
-    const newQuantity = typeof eventValue === 'number' ? eventValue : parseInt(eventValue || '', 10);
+  ngOnDestroy(): void {
+    // Clean up subscriptions
+    this.subscriptions.forEach(sub => sub.unsubscribe());
+    console.log('Cart component destroyed');
+  }
 
-    // Check if conversion is valid and different from current
-    if (isNaN(newQuantity) || newQuantity < 1 || newQuantity === item.quantity) {
-      // If invalid or unchanged, potentially reset input or do nothing
-      // For now, just log and return to avoid unnecessary API calls
-      console.log('Invalid or unchanged quantity:', eventValue);
-      // Optionally reset the input field value back to item.quantity if needed
-      // item.quantity = item.quantity; // This might require a small delay or ChangeDetectorRef
-      return;
-    }
+  updateQuantity(item: CartItem, newQuantity: string | number | null): void {
+    // Convert to number and ensure it's at least 1
+    const quantity = Math.max(1, Number(newQuantity) || 1);
+    
+    console.log(`Updating quantity for ${item.product.name} to ${quantity}`);
+    
+    this.cartService.updateItemQuantity(item.id, quantity)
+      .subscribe({
+        next: (updatedItem) => {
+          console.log('Item quantity updated successfully', updatedItem);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Quantity Updated',
+            detail: `${item.product.name} quantity updated to ${quantity}`
+          });
+        },
+        error: (error) => {
+          console.error('Error updating item quantity', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Update Failed',
+            detail: 'Failed to update quantity. Please try again.'
+          });
+        }
+      });
+  }
 
-    console.log(`Updating item ${item.id} quantity to ${newQuantity}`);
-    this.cartService.updateItemQuantity(item.id, newQuantity).subscribe({
-      error: (err) => {
-         console.error('Failed to update quantity', err);
-         // Optionally revert quantity in the UI on error
-         // item.quantity = item.quantity; // Revert (might need ChangeDetectorRef)
+  confirmRemove(item: CartItem): void {
+    this.confirmationService.confirm({
+      message: `Are you sure you want to remove ${item.product.name} from your cart?`,
+      accept: () => {
+        this.removeItem(item);
       }
     });
   }
 
-  removeItem(itemId: number) {
-    console.log(`Removing item ${itemId}`);
-    this.cartService.removeItem(itemId).subscribe({
-       error: err => console.error('Failed to remove item', err)
-       // Success implicitly handled by cart$ update via refreshCart
+  removeItem(item: CartItem): void {
+    console.log(`Removing item ${item.product.name} from cart`);
+    
+    this.cartService.removeItem(item.id)
+      .subscribe({
+        next: () => {
+          console.log('Item removed successfully');
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Item Removed',
+            detail: `${item.product.name} has been removed from your cart`
+          });
+        },
+        error: (error) => {
+          console.error('Error removing item', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Remove Failed',
+            detail: 'Failed to remove item. Please try again.'
+          });
+        }
+      });
+  }
+
+  checkout(): void {
+    console.log('Proceeding to checkout');
+    
+    // Navigate to checkout page
+    this.router.navigate(['/checkout']);
+    
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Checkout',
+      detail: 'Proceeding to checkout...'
     });
   }
 } 
